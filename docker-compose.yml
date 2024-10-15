@@ -1,0 +1,32 @@
+services:
+  web:
+    build: .
+    ports:
+      - "80:80"
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_USER=appuser
+      - POSTGRES_PASSWORD=appuser
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=djangogirls
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:17
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=djangogirls
+      - POSTGRES_USER=appuser
+      - POSTGRES_PASSWORD=appuser
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U appuser -d djangogirls'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:
